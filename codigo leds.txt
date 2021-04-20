@@ -5,17 +5,21 @@ const int SRCLK = 5;
 int j = 0;
 int fila[8] = {127, 191, 223, 239, 247, 251, 253, 254}; //eje x /intercambiar 0 por 1
 int columna[8] = {24, 24, 24, 255, 255, 24, 24, 24}; //eje y
-
+char arreglo[8];
+unsigned short int index=0;
+unsigned short int filas=0;
 
 void setup()
 {
-  char entrada[8] = {};
   Serial.begin(9600);
 
-  pinMode(SER, OUTPUT); // data
-  pinMode(RCLK, OUTPUT); // store
-  pinMode(SRCLK, OUTPUT); // shift
-
+  pinMode(SER, OUTPUT); 
+  pinMode(RCLK, OUTPUT); 
+  pinMode(SRCLK, OUTPUT);
+	
+  digitalWrite(SER, LOW); 
+  digitalWrite(RCLK, LOW);
+  digitalWrite(SRCLK, LOW);
 }
 
 void imagen(){
@@ -31,20 +35,35 @@ void imagen(){
     j = 0;
 }
 
-void prueva(){
-    digitalWrite(RCLK, LOW);
-    shiftOut(SER, SRCLK, MSBFIRST, fila[0] );
-    shiftOut(SER, SRCLK, MSBFIRST, columna[0]);
-    digitalWrite(RCLK, HIGH);
+void verificacion()
+{
+  if(filas<8){
+  digitalWrite(SER,1);
+  
+  digitalWrite(SRCLK, 0);
+  digitalWrite(SRCLK, 1);
+  digitalWrite(SRCLK, 0);
+  
+  digitalWrite(RCLK, 0);
+  digitalWrite(RCLK, 1);
+  digitalWrite(RCLK, 0);
+  filas++;
+  }
 }
 
 
 void loop()
-{
-    char f1[8],f2[8],f3[8],f4[8],f5[8],f6[8],f7[8],f8[8];
-    char cadena;
-    while(Serial.available()==0){};
-    cadena = Serial.read();	
-	Serial.print(cadena);
+{	
+  verificacion();
+}
+
+void ingreso(){
+   while(Serial.available()>0){
+      char caracter = Serial.read();
+      if(caracter!='\n'){
+         arreglo[index]=caracter;  
+         index++;
+      }
   }
   
+}
