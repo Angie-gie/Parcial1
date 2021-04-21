@@ -3,11 +3,16 @@ const int RCLK = 4;
 const int SRCLK = 5;
 
 int j = 0;
-int fila[8] = {127, 191, 223, 239, 247, 251, 253, 254}; //eje x /intercambiar 0 por 1
-int columna[8] = {24, 24, 24, 255, 255, 24, 24, 24}; //eje y
+int columna[8] = {B11000011,
+                  B11100111,
+                  B01111110,
+                  B00111100,
+                  B00111100,
+                  B00111100,
+                  B00111100,
+                  B00111100};
 char arreglo[8];
 unsigned short int index=0;
-unsigned short int filas=0;
 
 void setup()
 {
@@ -20,41 +25,60 @@ void setup()
   digitalWrite(SER, LOW); 
   digitalWrite(RCLK, LOW);
   digitalWrite(SRCLK, LOW);
+  
+  imagen();
+  
 }
 
 void imagen(){
-    for(int i=0; i<8; i++)
-    {
-      digitalWrite(RCLK, LOW);
+  byte row = B00000001;
+  for (int k=0; k<8; k++){
+    digitalWrite(RCLK,LOW);
+    desp(~columna[k]);
+    desp(row); 
+    digitalWrite(RCLK,HIGH);
+    row = row<<1;
+  }
+}
 
-      shiftOut(SER, SRCLK, MSBFIRST, fila[i] );
-      shiftOut(SER, SRCLK, MSBFIRST, columna[j]);
-      digitalWrite(RCLK, HIGH);
-      j++;
+void desp(byte data){
+  boolean estado;
+  digitalWrite(SER, LOW);
+  for(int i =0; i<8; i++) {
+    digitalWrite(SRCLK, LOW);
+    if(data & (1<<i)){ 
+      estado = HIGH;
     }
-    j = 0;
+    else{
+      estado = LOW;
+    }
+    digitalWrite (SER, estado) ;
+    digitalWrite(SRCLK, HIGH); 
+    digitalWrite(SER, LOW);
+  }
+  digitalWrite(SRCLK,LOW);
 }
 
 void verificacion()
 {
-  if(filas<8){
-  digitalWrite(SER,1);
-  
-  digitalWrite(SRCLK, 0);
-  digitalWrite(SRCLK, 1);
-  digitalWrite(SRCLK, 0);
-  
-  digitalWrite(RCLK, 0);
-  digitalWrite(RCLK, 1);
-  digitalWrite(RCLK, 0);
-  filas++;
+  for(int i=0;i<8;i++){
+    digitalWrite(SER,1);
+
+    digitalWrite(SRCLK, 0);
+    digitalWrite(SRCLK, 1);
+    digitalWrite(SRCLK, 0);
+
+    digitalWrite(RCLK, 0);
+    digitalWrite(RCLK, 1);
+    digitalWrite(RCLK, 0);
   }
 }
 
 
 void loop()
 {	
-  verificacion();
+  imagen();
+  
 }
 
 void ingreso(){
