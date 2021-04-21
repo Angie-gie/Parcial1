@@ -170,6 +170,106 @@ void loop(){
 
 \end{lstlisting}
 
+\subsection{Versión 2}
+
+La segunda versión de nuestro circuito usa 2 circuitos integrados y 3 pines digitales por la tanto se cambio el código para adaptarse a esto. Se realizó la función de verificación, lectura, una version inicial de la funcion imagen y una funcion complementaria a esta.
+
+\begin{lstlisting}[language=C++, label=codigo2]
+const int SER = 2;
+const int RCLK = 4;
+const int SRCLK = 5;
+
+int j = 0;
+int columna[8] = {B11000011,
+                  B11100111,
+                  B01111110,
+                  B00111100,
+                  B00111100,
+                  B00111100,
+                  B00111100,
+                  B00111100};
+char arreglo[8];
+unsigned short int index=0;
+
+void setup()
+{
+  Serial.begin(9600);
+
+  pinMode(SER, OUTPUT); 
+  pinMode(RCLK, OUTPUT); 
+  pinMode(SRCLK, OUTPUT);
+	
+  digitalWrite(SER, LOW); 
+  digitalWrite(RCLK, LOW);
+  digitalWrite(SRCLK, LOW);
+  
+  imagen();
+  
+}
+
+void imagen(){
+  byte row = B00000001;
+  for (int k=0; k<8; k++){
+    digitalWrite(RCLK,LOW);
+    desp(~columna[k]);
+    desp(row); 
+    digitalWrite(RCLK,HIGH);
+    row = row<<1;
+  }
+}
+
+void desp(byte data){
+  boolean estado;
+  digitalWrite(SER, LOW);
+  for(int i =0; i<8; i++) {
+    digitalWrite(SRCLK, LOW);
+    if(data & (1<<i)){ 
+      estado = HIGH;
+    }
+    else{
+      estado = LOW;
+    }
+    digitalWrite (SER, estado) ;
+    digitalWrite(SRCLK, HIGH); 
+    digitalWrite(SER, LOW);
+  }
+  digitalWrite(SRCLK,LOW);
+}
+
+void verificacion()
+{
+  for(int i=0;i<8;i++){
+    digitalWrite(SER,1);
+
+    digitalWrite(SRCLK, 0);
+    digitalWrite(SRCLK, 1);
+    digitalWrite(SRCLK, 0);
+
+    digitalWrite(RCLK, 0);
+    digitalWrite(RCLK, 1);
+    digitalWrite(RCLK, 0);
+  }
+}
+
+
+void loop()
+{	
+  imagen();
+  
+}
+
+void ingreso(){
+   while(Serial.available()>0){
+      char caracter = Serial.read();
+      if(caracter!='\n'){
+         arreglo[index]=caracter;  
+         index++;
+      }
+  }
+  
+}
+\end{lstlisting}
+
 %En la sección \ref{imagenes}, se presentará como añadir ilustraciones al texto.
 
 %\section{Inclusión de imágenes} \label{imagenes}
